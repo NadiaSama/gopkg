@@ -14,8 +14,10 @@ type (
 	}
 
 	confStruct struct {
-		meta    map[string]structMeta
-		confPtr atomic.Value //conf hold pointer value of struct. to make value settable
+		//meta hold conf struct field info. used by update method
+		meta map[string]structMeta
+		//conf hold pointer value of struct. to make value settable
+		confPtr atomic.Value
 	}
 )
 
@@ -41,14 +43,16 @@ func buildConfStruct(s interface{}) (*confStruct, error) {
 	}
 
 	for i := 0; i < amount; i++ {
+		var name string
 		field := t.Field(i)
-		if name, ok := field.Tag.Lookup("json"); !ok {
-			return nil, errors.WithMessagef(ErrInvalidConf, "field '%s' missing json tag", field.Name)
+		if n, ok := field.Tag.Lookup("sconf"); ok {
+			name = n
 		} else {
-			ret.meta[name] = structMeta{
-				Type: field.Type,
-				Idx:  i,
-			}
+			name = field.Name
+		}
+		ret.meta[name] = structMeta{
+			Type: field.Type,
+			Idx:  i,
 		}
 	}
 
