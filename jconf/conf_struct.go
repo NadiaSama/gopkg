@@ -1,4 +1,4 @@
-package jconf
+package sconf
 
 import (
 	"reflect"
