@@ -39,6 +39,8 @@ func Get(section string, conf interface{}) error {
 }
 
 //Update specific section config
+//update is a map of field name to field value. field name is
+//struct field name or sconf tag value if specific
 func Update(section string, update map[string]interface{}) error {
 	meta, err := getSection(section)
 	if err != nil {
