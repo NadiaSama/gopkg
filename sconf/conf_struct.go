@@ -17,7 +17,8 @@ type (
 		//meta hold conf struct field info. used by update method
 		meta map[string]structMeta
 		//conf hold pointer value of struct. to make value settable
-		confPtr atomic.Value
+		confPtr   atomic.Value
+		validator Validator
 	}
 )
 
@@ -26,7 +27,7 @@ var (
 )
 
 //buildConfStruct build confStruct
-func buildConfStruct(s interface{}) (*confStruct, error) {
+func buildConfStruct(s interface{}, val Validator) (*confStruct, error) {
 	pv := reflect.ValueOf(s)
 	kind := pv.Kind()
 	if kind != reflect.Ptr {
@@ -57,7 +58,11 @@ func buildConfStruct(s interface{}) (*confStruct, error) {
 	}
 
 	copy := copyStructToPtr(orig)
+	if err := val.Validate(copy.Interface()); err != nil {
+		return nil, err
+	}
 	ret.confPtr.Store(copy)
+	ret.validator = val
 	return ret, nil
 }
 
@@ -88,6 +93,9 @@ func (cf *confStruct) update(update map[string]interface{}) error {
 		}
 		field := elem.Field(meta.Idx)
 		field.Set(reflect.ValueOf(val))
+	}
+	if err := cf.validator.Validate(conf.Interface()); err != nil {
+		return err
 	}
 	cf.confPtr.Store(conf)
 	return nil

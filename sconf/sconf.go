@@ -6,14 +6,16 @@ var (
 	section2conf map[string]*confStruct = make(map[string]*confStruct)
 )
 
-//Add bind section and contStruct which parsed from conf
-//currently nested structure is not support
-func Add(section string, conf interface{}) error {
+//Add bind section and contStruct which parsed from conf.
+//Add is not concurrent safe it should be called in programme init
+//Validator will be called in Add and Update. validator is disabled
+//if val is nil
+func Add(section string, conf interface{}, val Validator) error {
 	if _, ok := section2conf[section]; ok {
 		return errors.New("duplicate section")
 	}
 
-	meta, err := buildConfStruct(conf)
+	meta, err := buildConfStruct(conf, val)
 	if err != nil {
 		return err
 	}

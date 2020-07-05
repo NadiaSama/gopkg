@@ -2,6 +2,8 @@ package sconf
 
 import (
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 type (
@@ -16,11 +18,22 @@ type (
 		Age  int    `sconf:"age"`
 		Val  float64
 	}
+
+	s2Validate struct {
+	}
 )
+
+func (sv *s2Validate) Validate(v interface{}) error {
+	val := v.(*s2)
+	if val.Age > 100 {
+		return errors.New("validate fail")
+	}
+	return nil
+}
 
 func TestParse(t *testing.T) {
 	ps2 := &s2{Age: 23, Name: "hehe"}
-	parsed, _ := buildConfStruct(ps2)
+	parsed, _ := buildConfStruct(ps2, NoValidate)
 	if parsed.meta["name"].Idx != 0 || parsed.meta["name"].Type.String() != "string" ||
 		parsed.meta["age"].Idx != 1 || parsed.meta["age"].Type.String() != "int" ||
 		parsed.meta["Val"].Idx != 2 || parsed.meta["Val"].Type.String() != "float64" {
@@ -30,7 +43,7 @@ func TestParse(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	ps2 := &s2{Age: 23, Name: "hehe"}
-	parsed, _ := buildConfStruct(ps2)
+	parsed, _ := buildConfStruct(ps2, NoValidate)
 
 	var d1 s1
 	var d2 s2
@@ -49,7 +62,7 @@ func TestLoad(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	ps2 := &s2{Age: 23, Name: "hehe", Val: 23.3}
-	parsed, _ := buildConfStruct(ps2)
+	parsed, _ := buildConfStruct(ps2, NoValidate)
 
 	if err := parsed.update(map[string]interface{}{"Val": 11.0, "name": "haha", "key": 1}); err == nil {
 		t.Errorf("update bad data failed")
@@ -72,4 +85,28 @@ func TestUpdate(t *testing.T) {
 		t.Errorf("update failed %v", d2)
 	}
 
+}
+
+func TestValidate(t *testing.T) {
+	ps2 := &s2{Age: 101, Name: "hehe", Val: 23.3}
+	v2 := &s2Validate{}
+	if _, err := buildConfStruct(ps2, v2); err == nil {
+		t.Errorf("test init validate fail")
+	}
+	ps2.Age = 99
+	parsed, _ := buildConfStruct(ps2, v2)
+
+	if err := parsed.update(map[string]interface{}{"age": 101}); err == nil {
+		t.Error("test update validate fail")
+	}
+	var d2 s2
+	parsed.load(&d2)
+	if d2.Age != 99 {
+		t.Errorf("test load fail %v", d2)
+	}
+	parsed.update(map[string]interface{}{"age": 98})
+	parsed.load(&d2)
+	if d2.Age != 98 {
+		t.Errorf("test load fail %v", d2)
+	}
 }
