@@ -7,7 +7,7 @@ struct based configuration
 * custom validator
 
 ### concurrent
-`sconf` use `atomic.Value` to store `config` struct. and to achieve concurrent operate
+`sconf` use `atomic.Value` to store `config` struct and implement concurrent operate
 
 
 ## example
