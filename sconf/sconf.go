@@ -3,8 +3,12 @@ package sconf
 import "github.com/pkg/errors"
 
 var (
-	section2conf map[string]*confStruct = make(map[string]*confStruct)
+	section2conf map[string]*confStruct = nil
 )
+
+func init() {
+	section2conf = make(map[string]*confStruct)
+}
 
 //Add bind section and contStruct which parsed from conf.
 //Add is not concurrent safe it should be called in programme init
@@ -23,9 +27,9 @@ func Add(section string, conf interface{}, val Validator) error {
 	return nil
 }
 
-//Load load sepcific section config and store into conf
+//Get get sepcific section config and store into conf
 //conf should be pointer type of config struct
-func Load(section string, conf interface{}) error {
+func Get(section string, conf interface{}) error {
 	meta, err := getSection(section)
 	if err != nil {
 		return err
