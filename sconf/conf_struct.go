@@ -44,14 +44,8 @@ func buildConfStruct(s interface{}, val Validator) (*confStruct, error) {
 	}
 
 	for i := 0; i < amount; i++ {
-		var name string
 		field := t.Field(i)
-		if n, ok := field.Tag.Lookup("sconf"); ok {
-			name = n
-		} else {
-			name = field.Name
-		}
-		ret.meta[name] = structMeta{
+		ret.meta[field.Name] = structMeta{
 			Type: field.Type,
 			Idx:  i,
 		}

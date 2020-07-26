@@ -8,14 +8,14 @@ import (
 
 type (
 	s1 struct {
-		Name string `sconf:"name"`
-		Age  int    `sconf:"age"`
+		Name string
+		Age  int
 		Val  float64
 	}
 
 	s2 struct {
-		Name string `sconf:"name"`
-		Age  int    `sconf:"age"`
+		Name string
+		Age  int
 		Val  float64
 	}
 
@@ -34,8 +34,8 @@ func (sv *s2Validate) Validate(v interface{}) error {
 func TestParse(t *testing.T) {
 	ps2 := &s2{Age: 23, Name: "hehe"}
 	parsed, _ := buildConfStruct(ps2, NoValidate)
-	if parsed.meta["name"].Idx != 0 || parsed.meta["name"].Type.String() != "string" ||
-		parsed.meta["age"].Idx != 1 || parsed.meta["age"].Type.String() != "int" ||
+	if parsed.meta["Name"].Idx != 0 || parsed.meta["Name"].Type.String() != "string" ||
+		parsed.meta["Age"].Idx != 1 || parsed.meta["Age"].Type.String() != "int" ||
 		parsed.meta["Val"].Idx != 2 || parsed.meta["Val"].Type.String() != "float64" {
 		t.Errorf("parse fail %v", parsed)
 	}
@@ -64,13 +64,13 @@ func TestUpdate(t *testing.T) {
 	ps2 := &s2{Age: 23, Name: "hehe", Val: 23.3}
 	parsed, _ := buildConfStruct(ps2, NoValidate)
 
-	if err := parsed.update(map[string]interface{}{"Val": 11.0, "name": "haha", "key": 1}); err == nil {
+	if err := parsed.update(map[string]interface{}{"Val": 11.0, "Name": "haha", "key": 1}); err == nil {
 		t.Errorf("update bad data failed")
 	}
-	if err := parsed.update(map[string]interface{}{"Val": 23, "name": 1.0}); err == nil {
+	if err := parsed.update(map[string]interface{}{"Val": 23, "Name": 1.0}); err == nil {
 		t.Errorf("update bad fmt failed")
 	}
-	if err := parsed.update(map[string]interface{}{"Val": 11.0, "name": "new", "age": 12}); err != nil {
+	if err := parsed.update(map[string]interface{}{"Val": 11.0, "Name": "new", "Age": 12}); err != nil {
 		t.Errorf("update failed %v", err.Error())
 	}
 
@@ -79,7 +79,7 @@ func TestUpdate(t *testing.T) {
 	if d2.Name != "new" || d2.Age != 12 || d2.Val != 11.0 {
 		t.Errorf("update failed %v", d2)
 	}
-	parsed.update(map[string]interface{}{"Val": 23.0, "name": "u2"})
+	parsed.update(map[string]interface{}{"Val": 23.0, "Name": "u2"})
 	parsed.load(&d2)
 	if d2.Name != "u2" || d2.Age != 12 || d2.Val != 23.0 {
 		t.Errorf("update failed %v", d2)
@@ -96,7 +96,7 @@ func TestValidate(t *testing.T) {
 	ps2.Age = 99
 	parsed, _ := buildConfStruct(ps2, v2)
 
-	if err := parsed.update(map[string]interface{}{"age": 101}); err == nil {
+	if err := parsed.update(map[string]interface{}{"Age": 101}); err == nil {
 		t.Error("test update validate fail")
 	}
 	var d2 s2
@@ -104,7 +104,7 @@ func TestValidate(t *testing.T) {
 	if d2.Age != 99 {
 		t.Errorf("test load fail %v", d2)
 	}
-	parsed.update(map[string]interface{}{"age": 98})
+	parsed.update(map[string]interface{}{"Age": 98})
 	parsed.load(&d2)
 	if d2.Age != 98 {
 		t.Errorf("test load fail %v", d2)
