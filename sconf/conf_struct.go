@@ -83,7 +83,7 @@ func (cf *confStruct) update(data interface{}) error {
 			pv = pv.Elem()
 		}
 		if pv.Kind() == reflect.Struct {
-			update = structToMap(data)
+			update = structToMap(pv.Interface())
 		} else {
 			return errors.Errorf("bad update data")
 		}
