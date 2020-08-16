@@ -12,6 +12,7 @@ struct based configuration
 
 ## example
 ```go
+
 package main
 
 import (
@@ -22,9 +23,14 @@ import (
 
 type (
 	confStruct struct {
-		Name string `sconf:"name"`
+		Name string
 		Age  int
-		Val  float64 `sconf:"val"`
+		Val  float64
+	}
+
+	upConf struct {
+		Name string
+		Val  float64
 	}
 )
 
@@ -39,9 +45,18 @@ func main() {
 	sconf.Get("test", &d)
 	fmt.Printf("%v\n", d)
 
-	sconf.Update("test", map[string]interface{}{"Age": 21, "val": 11.0})
+	sconf.Update("test", map[string]interface{}{"Age": 21, "Val": 11.0})
 	sconf.Get("test", &d)
 	fmt.Printf("%v\n", d)
+
+	u := upConf{
+		Name: "new name",
+		Val:  2.333,
+	}
+	sconf.Update("test", &u)
+	sconf.Get("test", &d)
+	fmt.Printf("%v\n", d)
+
 }
 
 ```
