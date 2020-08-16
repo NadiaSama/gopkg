@@ -25,11 +25,12 @@ func main() {
 		Age:  23,
 		Val:  120.0,
 	}
-	sconf.Add("test", &cs, sconf.NoValidate)
+	ins, _ := sconf.Add("test", &cs, sconf.NoValidate)
 	var d confStruct
 	sconf.Get("test", &d)
 	fmt.Printf("%v\n", d)
 
+	//update with name
 	sconf.Update("test", map[string]interface{}{"Age": 21, "Val": 11.0})
 	sconf.Get("test", &d)
 	fmt.Printf("%v\n", d)
@@ -38,8 +39,10 @@ func main() {
 		Name: "new name",
 		Val:  2.333,
 	}
-	sconf.Update("test", &u)
-	sconf.Get("test", &d)
+
+	//update with instance
+	ins.Update(&u)
+	ins.Get(&d)
 	fmt.Printf("%v\n", d)
 
 }
