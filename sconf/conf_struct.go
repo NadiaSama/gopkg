@@ -26,7 +26,7 @@ var (
 	ErrInvalidConf = errors.New("invalid config struct")
 )
 
-//buildConfStruct build confStruct
+//buildConfStruct build confStruct meta map
 func buildConfStruct(s interface{}, val Validator) (*confStruct, error) {
 	pv := reflect.ValueOf(s)
 	kind := pv.Kind()
@@ -73,7 +73,22 @@ func (cf *confStruct) load(dst interface{}) error {
 	return nil
 }
 
-func (cf *confStruct) update(update map[string]interface{}) error {
+func (cf *confStruct) update(data interface{}) error {
+	var update map[string]interface{}
+	if v, ok := data.(map[string]interface{}); ok {
+		update = v
+	} else {
+		pv := reflect.ValueOf(data)
+		if pv.Kind() == reflect.Ptr {
+			pv = pv.Elem()
+		}
+		if pv.Kind() == reflect.Struct {
+			update = structToMap(data)
+		} else {
+			return errors.Errorf("bad update data")
+		}
+	}
+
 	conf := copyStructToPtr(cf.confPtr.Load().(reflect.Value).Elem())
 	elem := conf.Elem()
 	for key, val := range update {
@@ -104,5 +119,20 @@ func copyStructToPtr(src reflect.Value) reflect.Value {
 		df := t.Field(i)
 		df.Set(sf)
 	}
+	return ret
+}
+
+//convert struct to map used by update
+func structToMap(val interface{}) map[string]interface{} {
+	ret := map[string]interface{}{}
+	value := reflect.ValueOf(val)
+	typ := reflect.TypeOf(val)
+	amount := value.NumField()
+	for i := 0; i < amount; i++ {
+		tf := typ.Field(i)
+		vf := value.Field(i)
+		ret[tf.Name] = vf.Interface()
+	}
+
 	return ret
 }

@@ -110,3 +110,16 @@ func TestValidate(t *testing.T) {
 		t.Errorf("test load fail %v", d2)
 	}
 }
+
+func TestStructToMap(t *testing.T) {
+	s := s1{
+		Name: "hehe",
+		Age:  23,
+		Val:  12.0,
+	}
+
+	m := structToMap(s)
+	if m["Name"].(string) != "hehe" || m["Age"].(int) != 23 || m["Val"].(float64) != 12.0 {
+		t.Errorf("bad map %v", m)
+	}
+}
